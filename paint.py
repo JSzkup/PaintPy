@@ -13,14 +13,30 @@ class Paint(object):
 
         self.menubar = Menu(self.root)
         self.fileMenu = Menu(self.root, tearoff=0)
+        self.editMenu = Menu(self.root, tearoff=0)
+        self.viewMenu = Menu(self.root, tearoff=0)
 
+        # Creating the TOP file menu
         self.menubar.add_cascade(label="File", menu=self.fileMenu)
-        self.menubar.add_cascade(label="View", menu=self.fileMenu)
-
+        # Dropdown Menu for file menu
         self.fileMenu.add_command(label="Open")
         self.fileMenu.add_command(label="Save")
-        self.fileMenu.add_command(label="Exit", command=self.quit_app)
+        self.fileMenu.add_separator()
+        self.fileMenu.add_command(label="Exit", command=self.quitApp)
 
+        # Creating EDIT tab in menubar
+        self.menubar.add_cascade(label="Edit", menu=self.editMenu)
+        self.editMenu.add_command(label="Undo")
+        self.editMenu.add_command(label="Clear Canvas")
+
+        # Creating the View tab in the menubar, next to file
+        self.menubar.add_cascade(label="View", menu=self.viewMenu)
+        self.viewMenu.add_command(label="Fullscreen", command=self.fullscreen)
+        self.viewMenu.add_command(label="Hide UI")
+        self.viewMenu.add_separator()
+        self.viewMenu.add_command(label="About")
+
+        # Start of the Brush UI
         self.penButton = Button(self.root, text='pen', command=self.usePen)
         self.penButton.grid(row=0, column=0)
 
@@ -36,26 +52,32 @@ class Paint(object):
             self.root, text='eraser', command=self.useEraser)
         self.eraser_button.grid(row=0, column=3)
 
-        self.chooseSizeButton = Scale(
+        self.sizeSlider = Scale(
             self.root, from_=1, to=10, orient=HORIZONTAL)
-        self.chooseSizeButton.grid(row=0, column=4)
+        self.sizeSlider.grid(row=0, column=4)
 
-        self.background = Canvas(self.root, bg='white', width=600, height=600)
+        # TODO implement
+        # self.deleteAll = Button(
+        #     self.root, text='Delete All', command=self.DeleteALL)
+        # self.eraser_button.grid(row=0, column=5)
+
+        # Sets resolution of the window, color of the canvas
+        self.background = Canvas(self.root, bg='white', width=950, height=700)
         self.background.grid(row=1, columnspan=5)
 
         # configures and dsiplays the menu bar (file/View)
         self.root.config(menu=self.menubar)
-
         self.setup()
         self.root.mainloop()
 
     def setup(self):
         self.oldX = None
         self.oldY = None
-        self.lineWidth = self.chooseSizeButton.get()
+        self.lineWidth = self.sizeSlider.get()
         self.color = self.DEFAULT_COLOR
         self.eraserOn = False
         self.activeButton = self.penButton
+        # Sets mouse click one to paint on the canvas
         self.background.bind('<B1-Motion>', self.paint)
         self.background.bind('<ButtonRelease-1>', self.reset)
 
@@ -70,17 +92,26 @@ class Paint(object):
         self.color = askcolor(color=self.color)[1]
 
     def useEraser(self):
-        self.activateButton(self.eraser_button, eraser_mode=True)
+        # Eraser sets color of the brush to white
+        self.activateButton(self.eraser_button, eraserMode=True)
 
-    def activateButton(self, some_button, eraser_mode=False):
+    def activateButton(self, someButton, eraserMode=False):
+        # On button click the button will sink, and if selectable will stay sunken
         self.activeButton.config(relief=RAISED)
-        some_button.config(relief=SUNKEN)
-        self.activeButton = some_button
-        self.eraserOn = eraser_mode
+        someButton.config(relief=SUNKEN)
+        self.activeButton = someButton
+        self.eraserOn = eraserMode
+
+    def fullscreen(self):
+        # TODO scale the whole drawing window to resolution (Canvas())
+        self.root.attributes("-fullscreen", True)
 
     def paint(self, event):
-        self.lineWidth = self.chooseSizeButton.get()
+        # Gets the size of the stroke
+        self.lineWidth = self.sizeSlider.get()
+        # Sets the eraser to be the color "white"
         paintColor = 'white' if self.eraserOn else self.color
+        # Painting based on position of the mouse relative to the canvas
         if self.oldX and self.oldY:
             self.background.create_line(self.oldX, self.oldY, event.x, event.y,
                                         width=self.lineWidth, fill=paintColor,
@@ -91,7 +122,7 @@ class Paint(object):
     def reset(self, event):
         self.oldX, self.oldY = None, None
 
-    def quit_app(event=None):
+    def quitApp(self):
         self.root.quit()
 
 
@@ -106,5 +137,3 @@ if __name__ == '__main__':
 # TODO Save function
 # TODO line / shape tool
 # TODO Clear all
-# TODO
-# TODO
