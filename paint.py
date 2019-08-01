@@ -11,6 +11,7 @@ class Paint(object):
         self.root = Tk()
         self.root.title("PaintPy")
 
+        # ------------TOP UI------------
         self.menubar = Menu(self.root)
         self.fileMenu = Menu(self.root, tearoff=0)
         self.editMenu = Menu(self.root, tearoff=0)
@@ -27,7 +28,7 @@ class Paint(object):
         # Creating EDIT tab in menubar
         self.menubar.add_cascade(label="Edit", menu=self.editMenu)
         self.editMenu.add_command(label="Undo")
-        self.editMenu.add_command(label="Clear Canvas")
+        self.editMenu.add_command(label="Clear Canvas", command=self.deleteAll)
 
         # Creating the View tab in the menubar, next to file
         self.menubar.add_cascade(label="View", menu=self.viewMenu)
@@ -36,7 +37,7 @@ class Paint(object):
         self.viewMenu.add_separator()
         self.viewMenu.add_command(label="About")
 
-        # Start of the Brush UI
+        # ------------main UI------------
         self.penButton = Button(self.root, text='pen', command=self.usePen)
         self.penButton.grid(row=0, column=0)
 
@@ -62,7 +63,7 @@ class Paint(object):
         # self.eraser_button.grid(row=0, column=5)
 
         # Sets resolution of the window, color of the canvas
-        self.background = Canvas(self.root, bg='white', width=950, height=700)
+        self.background = Canvas(self.root, bg='white', width=950, height=700,)
         self.background.grid(row=1, columnspan=5)
 
         # configures and dsiplays the menu bar (file/View)
@@ -79,6 +80,7 @@ class Paint(object):
         self.activeButton = self.penButton
         # Sets mouse click one to paint on the canvas
         self.background.bind('<B1-Motion>', self.paint)
+        # Stops the mouse from drawing on M1 release
         self.background.bind('<ButtonRelease-1>', self.reset)
 
     def usePen(self):
@@ -96,7 +98,8 @@ class Paint(object):
         self.activateButton(self.eraser_button, eraserMode=True)
 
     def activateButton(self, someButton, eraserMode=False):
-        # On button click the button will sink, and if selectable will stay sunken
+        # On button click the button will sink
+        # if selectable will stay sunken
         self.activeButton.config(relief=RAISED)
         someButton.config(relief=SUNKEN)
         self.activeButton = someButton
@@ -105,6 +108,8 @@ class Paint(object):
     def fullscreen(self):
         # TODO scale the whole drawing window to resolution (Canvas())
         self.root.attributes("-fullscreen", True)
+        # menu.entryconfigure(1, label="Exit Fullscreen")
+        # TODO if already in fullscreen have the text change to exit fullscreen, and leave fullscreen
 
     def paint(self, event):
         # Gets the size of the stroke
@@ -115,13 +120,20 @@ class Paint(object):
         if self.oldX and self.oldY:
             self.background.create_line(self.oldX, self.oldY, event.x, event.y,
                                         width=self.lineWidth, fill=paintColor,
-                                        capstyle=ROUND, smooth=TRUE, splinesteps=36)
+                                        capstyle=ROUND, smooth=TRUE,
+                                        splinesteps=36)
         self.oldX = event.x
         self.oldY = event.y
 
+    # stops drawing
     def reset(self, event):
         self.oldX, self.oldY = None, None
 
+    # Deletes everything on the canvas
+    def deleteAll(self):
+        self.background.delete("all")
+
+    # Closes PaintPy
     def quitApp(self):
         self.root.quit()
 
