@@ -33,34 +33,29 @@ class Paint(object):
         # Creating the View tab in the menubar, next to file
         self.menubar.add_cascade(label="View", menu=self.viewMenu)
         self.viewMenu.add_command(label="Fullscreen", command=self.fullscreen)
-        self.viewMenu.add_command(label="Hide UI")
+        self.viewMenu.add_command(label="Hide UI", command=self.hideUI)
         self.viewMenu.add_separator()
-        self.viewMenu.add_command(label="About")
+        self.viewMenu.add_command(label="About", command=self.aboutPage)
 
         # ------------main UI------------
         self.penButton = Button(self.root, text='pen', command=self.usePen)
         self.penButton.grid(row=0, column=0)
 
-        self.brushButton = Button(
-            self.root, text='brush', command=self.useBrush)
-        self.brushButton.grid(row=0, column=1)
+        self.shapeButton = Button(
+            self.root, text='Shape', command=self.changeShape)
+        self.shapeButton.grid(row=0, column=1)
 
         self.colorButton = Button(
             self.root, text='color', command=self.chooseColor)
         self.colorButton.grid(row=0, column=2)
 
-        self.eraser_button = Button(
+        self.eraserButton = Button(
             self.root, text='eraser', command=self.useEraser)
-        self.eraser_button.grid(row=0, column=3)
+        self.eraserButton.grid(row=0, column=3)
 
         self.sizeSlider = Scale(
             self.root, from_=1, to=10, orient=HORIZONTAL)
         self.sizeSlider.grid(row=0, column=4)
-
-        # TODO implement
-        # self.deleteAll = Button(
-        #     self.root, text='Delete All', command=self.DeleteALL)
-        # self.eraser_button.grid(row=0, column=5)
 
         # Sets resolution of the window, color of the canvas
         self.background = Canvas(self.root, bg='white', width=950, height=700,)
@@ -79,15 +74,47 @@ class Paint(object):
         self.eraserOn = False
         self.activeButton = self.penButton
         # Sets mouse click one to paint on the canvas
+        # TODO if shape is selected, draw shape instead
         self.background.bind('<B1-Motion>', self.paint)
         # Stops the mouse from drawing on M1 release
         self.background.bind('<ButtonRelease-1>', self.reset)
 
+    # Hides the top ui from the user
+    def hideUI(self):
+        self.penButton.grid_remove()
+        self.shapeButton.grid_remove()
+        self.colorButton.grid_remove()
+        self.eraserButton.grid_remove()
+        self.sizeSlider.grid_remove()
+
+    # TODO implement this into menu bar
+    def restoreUI(self):
+        self.penButton.grid()
+        self.shapeButton.grid()
+        self.colorButton.grid()
+        self.eraserButton.grid()
+        self.sizeSlider.grid()
+
     def usePen(self):
         self.activateButton(self.penButton)
 
-    def useBrush(self):
-        self.activateButton(self.brushButton)
+    def changeShape(self):
+        self.activateButton(self.shapeButton)
+
+        self.top = Toplevel()
+        self.shapeMenu = Menu(self.top)
+
+        self.top.title("Shape Selection")
+        self.msg = Message(self.top, text="sample text")
+        self.msg.pack()
+
+    def aboutPage(self):
+        self.about = Toplevel(master=None, padx=10, pady=10)
+
+        self.about.title("About PaintPy")
+        self.msg = Message(
+            self.about, text="Created by Jonathan Szkup using Python")
+        self.msg.pack()
 
     def chooseColor(self):
         self.eraserOn = False
@@ -95,7 +122,7 @@ class Paint(object):
 
     def useEraser(self):
         # Eraser sets color of the brush to white
-        self.activateButton(self.eraser_button, eraserMode=True)
+        self.activateButton(self.eraserButton, eraserMode=True)
 
     def activateButton(self, someButton, eraserMode=False):
         # On button click the button will sink
